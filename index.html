@@ -37,7 +37,43 @@
 			     -o-transition:all 1s ease-out;
 			        transition:all 1s ease-out;
 		}
+		.loader{
+			background-image:url('spinner.png');
+			background-position:50% 50%;
+			background-repeat:no-repeat;
+			position:absolute;
+			left:0;
+			top:0;
+			width:100%;
+			height:100%;
+			z-index:5;
+			-webkit-animation: spin 0.25s infinite linear;
+			   -moz-animation: spin 0.25s infinite linear;
+			    -ms-animation: spin 0.25s infinite linear;
+			     -o-animation: spin 0.25s infinite linear;
+			        animation: spin 0.25s infinite linear;
+		}
+		@-webkit-keyframes spin {
+		    to { -webkit-transform: rotate(360deg); }
+		}
+
+		@-moz-keyframes spin {
+		    to { -moz-transform: rotate(360deg); }
+		}
+
+		@-ms-keyframes spin {
+		    to { -ms-transform: rotate(360deg); }
+		}
+
+		@-o-keyframes spin {
+		    to { -o-transform: rotate(360deg); }
+		}
+
+		@keyframes spin {
+		    to { transform: rotate(360deg); }
+		}
 		canvas{
+			cursor:pointer;
 			position:absolute;
 			left:0;
 			top:0;
@@ -59,5 +95,6 @@
 	</script>
 	<script src="utils.js"></script>
 	<script src="main.js"></script>
+	<div id="loading" class="hide"></div>
 </body>
 </html>

@@ -3,7 +3,15 @@ setup();
 function setup(){
 	setupCanvas();
 	setupEvents();
-	photoArray = ['boxes.jpg','ce.jpg','cloud.jpg','flowers-big.jpg','fizz-beach.jpg','field.jpeg','fizz-bed.jpeg','fizz-car.jpeg'];
+	photoArray = [
+		'boxes.jpg',
+		'fizz-car.jpeg',
+		'cloud.jpg',
+		'ce.jpg',
+		'flowers-big.jpg',
+		'fizz-beach.jpg',
+		'field.jpeg',
+		'fizz-bed.jpeg'];
 	loadImageIntoCanvas(photoArray[0]);
 }
 
@@ -14,6 +22,8 @@ function setupCanvas(){
 	c.id="one";
 	ctx = c.getContext('2d');
 	c.className='';
+	c.alt = "photos";
+	c.title = "CLICK FOR NEXT"
 	document.getElementsByTagName('body')[0].appendChild(c);
 
 	toggleCanvas = false;
@@ -32,8 +42,10 @@ function setupEvents(){
 
 
 function loadImageIntoCanvas(url){
+	loading(true);
 	var img = document.createElement('img');
 	img.onload = function(){
+		loading(false);
 		var targetCtx = ctx;
 		var targetCanvas = c;
 		drawImageInPlace(img,targetCtx);
@@ -53,6 +65,7 @@ function drawImageInPlace(img,targetCtx){
 	animateDraw(clipboardCtx,targetCtx,off,img,col);
 	drawInner(targetCtx,off,img);
 }
+
 var current;
 function animateDraw(clipboard,target,offset,image,colour){
 	cancelAnimationFrame(current);
@@ -171,10 +184,22 @@ function inverseColour(col){
 }
 
 function loadNextImage(){
+
 	index++;
-	if(index>photoArray.length){
+	if(index>=photoArray.length){
 		index = 0;
 	}
 	loadImageIntoCanvas(photoArray[index]);
+}
+
+function loading(l){
+	if(!document.querySelector('#loading')){
+		return;
+	}
+	if(l){
+		document.querySelector('#loading').className = 'loader';
+	} else {
+		document.querySelector('#loading').className = 'hide';
+	}
 }
 
