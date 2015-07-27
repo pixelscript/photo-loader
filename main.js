@@ -1,4 +1,4 @@
-var w,h,c,ctx,c2,ctx2,clipboard,clipboardCtx,photoArray ,index=0,toggleCanvas;
+var w,h,c,ctx,c2,ctx2,clipboard,clipboardCtx,photoArray ,index=0,toggleCanvas,scaleFactor=0.5,border=50;
 setup();
 function setup(){
 	setupCanvas();
@@ -15,10 +15,27 @@ function setup(){
 	loadImageIntoCanvas(photoArray[0]);
 }
 
+window.onresize = redraw;
+var to;
+function redraw(){
+
+	clearTimeout(to);
+	to = setTimeout(function(){
+		console.log('redraw');
+		c.width = w = getWidth();
+		c.height = h = getHeight();
+		clipboard.width = w;
+		clipboard.height = h;
+		loadImageIntoCanvas(photoArray[index]);
+			
+	},500)
+
+}
+
 function setupCanvas(){
 	c = document.createElement('canvas');
-	c.width = w = getWidth()*2;
-	c.height = h = getHeight()*2;
+	c.width = w = getWidth();
+	c.height = h = getHeight();
 	c.id="one";
 	ctx = c.getContext('2d');
 	c.className='';
@@ -32,12 +49,32 @@ function setupCanvas(){
 	clipboard.width = w;
 	clipboard.height = h;
 	clipboardCtx = clipboard.getContext('2d');
+	clipboardCtx.scale(scaleFactor,scaleFactor);
 }
 
 function setupEvents(){
 	document.getElementsByTagName('body')[0].addEventListener('click',function(){
 		loadNextImage();
 	})
+}
+
+function calculateScaleFactor(image){
+	var sfw = 1;
+	var sfh = 1;
+	var nw = image.naturalWidth;
+	var nh = image.naturalHeight;
+	if(nw>w-(border*2)){
+		sfw = (w-(border*2)) / nw;
+	}
+	if(nh>h-(border*2)){
+		sfh = (h-(border*2)) / nh;
+	}
+	return Math.min(sfw,sfh);
+}
+
+function setScaleFactor(val){
+	clipboardCtx.scale(val/scaleFactor,val/scaleFactor);
+	scaleFactor = val;
 }
 
 
@@ -55,13 +92,14 @@ function loadImageIntoCanvas(url){
 }
 
 function drawImageInPlace(img,targetCtx){
+	setScaleFactor(calculateScaleFactor(img));
 	clearCanvas(clipboardCtx);
 	var off = calculateOffsets(img);
-	clipboardCtx.drawImage(img, off.x, off.y);
-	var col = getAverageColor(clipboardCtx);
-	clearCanvas(targetCtx,'#FFF');
+	clipboardCtx.drawImage(img, 0, 0);
+	var col = getAverageColor(clipboardCtx,img);
+	clearCanvas(targetCtx);
 	clearCanvas(targetCtx,'rgba('+col.r+','+col.g+','+col.b+',0.3)');
-	drawBorder(targetCtx,22,off,img,'#FFF');
+	drawBorder(targetCtx,12,off,img,'#FFF');
 	animateDraw(clipboardCtx,targetCtx,off,img,col);
 	drawInner(targetCtx,off,img);
 }
@@ -72,7 +110,7 @@ function animateDraw(clipboard,target,offset,image,colour){
 	var threshold = 100;
 	function iterate(){
 		colour = {"r":255*(threshold/100),"g":255*(threshold/100),"b":255*(threshold/100)}
-		var generated = copyThreshhold(clipboard,offset,image,threshold,colour);
+		var generated = copyThreshhold(clipboard,image,threshold,colour);
 		target.putImageData(generated, offset.x, offset.y);
 		
 		threshold-=1;
@@ -84,8 +122,8 @@ function animateDraw(clipboard,target,offset,image,colour){
 }
 
 function calculateOffsets(image){
-	width = image.naturalWidth;
-	height = image.naturalHeight;
+	width = image.naturalWidth*scaleFactor;
+	height = image.naturalHeight*scaleFactor;
 	var offX = Math.round((w-width)/2);
 	var offY = Math.round((h-height)/2);
 	return {'x':offX,'y':offY};
@@ -93,10 +131,13 @@ function calculateOffsets(image){
 
 function clearCanvas(c,col){
 	if(!col){
-		col = "#FFF";
+		c.clearRect(0, 0, w, h);
+	} else {
+		c.fillStyle = col;
+		c.fillRect (0, 0, w, h);
 	}
-	c.fillStyle = col;
-	c.fillRect (0, 0, w, h);
+
+
 }
 
 function drawBorder(c,size,offset,image,col){
@@ -104,8 +145,8 @@ function drawBorder(c,size,offset,image,col){
 	if(!col){
 		col = "#FFF";
 	}
-	width = Math.min(w,image.naturalWidth);
-	height = Math.min(h,image.naturalHeight);
+	width = image.naturalWidth*scaleFactor;
+	height = image.naturalHeight*scaleFactor;
 	c.fillStyle = col;
 	c.fillRect(offset.x-size, offset.y-size, width+(size*2), height+(size*2));
 	c.fillStyle = 'rgba(0,0,0,0.3)';
@@ -119,8 +160,8 @@ function drawBorder(c,size,offset,image,col){
 }
 
 function drawInner(c,offset,image){
-	width = Math.min(w,image.naturalWidth);
-	height = Math.min(h,image.naturalHeight);
+	width = image.naturalWidth*scaleFactor;
+	height = image.naturalHeight*scaleFactor;
 	c.fillStyle = 'rgba(0,0,0,0.3)';
 	c.fillRect(offset.x-1,offset.y-1,1,height+2);
 	c.fillRect(offset.x-1,offset.y-1,width+2,1);
@@ -128,10 +169,10 @@ function drawInner(c,offset,image){
 	c.fillRect(offset.x,offset.y+height,width+1,1);
 }
 
-function getAverageColor(c){
+function getAverageColor(c,img){
 	var size = 10;
-	var imageColours = c.getImageData(Math.floor((w/2)-(size/2)),
-								Math.floor((h/2)-(size/2)),
+	var imageColours = c.getImageData(Math.floor(((img.naturalWidth*scaleFactor)/2)-(size/2)),
+								Math.floor(((img.naturalHeight*scaleFactor)/2)-(size/2)),
 								size,size);
 	var totalR = 0,
 		totalG = 0,
@@ -149,9 +190,9 @@ function getAverageColor(c){
 	return {r:avR,g:avG,b:avB};
 }
 
-function copyThreshhold(c,offset,img,threshold,colour){
+function copyThreshhold(c,img,threshold,colour){
 	var size = 10;
-	var imageColours = c.getImageData(offset.x,offset.y,img.naturalWidth,img.naturalHeight);
+	var imageColours = c.getImageData(0,0,img.naturalWidth*scaleFactor,img.naturalHeight*scaleFactor);
 
 	for(var i=0; i<imageColours.data.length; i+=4){
 		var total = imageColours.data[i]+imageColours.data[i+1]+imageColours.data[i+2];

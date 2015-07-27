@@ -2,7 +2,6 @@
 <html>
 <head>
 	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=2">
 	<title>
 		Photos
 	</title>
@@ -19,27 +18,13 @@
 			margin:0;
 			padding:0;
 		}
-		body{
-			zoom: 0.5; -moz-transform: scale(0.5); -moz-transform-origin: 0 0}
-		}
 		.hide{
 			display:none;
-		}
-		.left{
-			transform:translate3d(-100%,0,0);
-		}
-		.right{
-			transform:translate3d(100%,0,0);
-		}
-		.animate{
-			-webkit-transition:all 1s ease-out;
-			   -moz-transition:all 1s ease-out;
-			     -o-transition:all 1s ease-out;
-			        transition:all 1s ease-out;
 		}
 		.loader{
 			background-image:url('spinner.png');
 			background-position:50% 50%;
+			background-size: 50px 50px;
 			background-repeat:no-repeat;
 			position:absolute;
 			left:0;
