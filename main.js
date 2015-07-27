@@ -1,36 +1,20 @@
+var w,h,c,ctx,c2,ctx2,clipboard,clipboardCtx,photoArray ,index=0,toggleCanvas;
 setup();
-
-var w,h,c,ctx,c2,ctx2,clipboard,clipboardCtx,photoArray = [],index=0,toggleCanvas;
-
 function setup(){
-	startLoad();
 	setupCanvas();
 	setupEvents();
-}
-
-function startLoad(){
-	// load photos from flickr
-	var script = document.createElement('script');
-	script.src = 'https://api.flickr.com/services/rest/?&jsoncallback=getPhotoData&method=flickr.photos.search&api_key=909ef763e4aac518da1d54e1b84b1364&user_id=125773262%40N05&format=json&tags=chosen&extras=date_taken';
-	document.getElementsByTagName('body')[0].appendChild(script);
+	photoArray = ['boxes.jpg','ce.jpg','cloud.jpg','flowers-big.jpg','fizz-beach.jpg','field.jpeg','fizz-bed.jpeg','fizz-car.jpeg'];
+	loadImageIntoCanvas(photoArray[0]);
 }
 
 function setupCanvas(){
 	c = document.createElement('canvas');
-	c.width = w = getWidth();
-	c.height = h = getHeight();
+	c.width = w = getWidth()*2;
+	c.height = h = getHeight()*2;
 	c.id="one";
 	ctx = c.getContext('2d');
 	c.className='';
 	document.getElementsByTagName('body')[0].appendChild(c);
-
-	// c2 = document.createElement('canvas');
-	// c2.width = w = getWidth();
-	// c2.height = h = getHeight();
-	// c2.id="two";
-	// ctx2 = c2.getContext('2d');
-	// document.getElementsByTagName('body')[0].appendChild(c2);
-	// c2.className='';
 
 	toggleCanvas = false;
 
@@ -47,56 +31,15 @@ function setupEvents(){
 }
 
 
-function getPhotoData(data)
-{
-	var array = data.photos.photo;
-    for (var i=0; i<array.length;i++){
-    	var photo = array[i];
-    	photoArray.push({
-    		"title": photo.title,
-    		"thumb": getThumb(photo),
-    		"main": getMain(photo)
-    	})
-    }
-
-    finishedDataLoading();
-}
-
-function getThumb(photo){
-	return 'http://farm'+photo.farm+'.staticflickr.com/'+photo.server+'/'+photo.id+'_'+photo.secret+'_q.jpg';
-}
-
-function getMain(photo){
-	return "http://farm"+photo.farm+".staticflickr.com/"+photo.server+"/"+photo.id+"_"+photo.secret+"_b.jpg"
-}
-
-function finishedDataLoading(){
-	loadImageIntoCanvas(photoArray[0].main);
-}
-
 function loadImageIntoCanvas(url){
 	var img = document.createElement('img');
-	img.crossOrigin = "Anonymous";
 	img.onload = function(){
 		var targetCtx = ctx;
 		var targetCanvas = c;
-		// var currentCtx = ctx2;
-		// var currentCanvas = c2;
-		// if(toggleCanvas){
-		// 	targetCtx = ctx2;
-		// 	targetCanvas = c2;
-		// 	currentCtx = ctx;
-		// 	currentCanvas = c;
-		// }
 		drawImageInPlace(img,targetCtx);
-		// targetCanvas.className = 'right';
-		// setTimeout(function(){
-		// 	currentCanvas.className = 'animate left';
-		// 	targetCanvas.className = 'animate';
-		// },10);
-		// toggleCanvas = !toggleCanvas;
 	}
     img.src = url;
+    img.crossOrigin = "anonymous";
 }
 
 function drawImageInPlace(img,targetCtx){
@@ -107,13 +50,31 @@ function drawImageInPlace(img,targetCtx){
 	clearCanvas(targetCtx,'#FFF');
 	clearCanvas(targetCtx,'rgba('+col.r+','+col.g+','+col.b+',0.3)');
 	drawBorder(targetCtx,22,off,img,'#FFF');
-	targetCtx.drawImage(img, off.x, off.y);
+	animateDraw(clipboardCtx,targetCtx,off,img,col);
 	drawInner(targetCtx,off,img);
+}
+var current;
+function animateDraw(clipboard,target,offset,image,colour){
+	cancelAnimationFrame(current);
+	var threshold = 100;
+	function iterate(){
+		colour = {"r":255*(threshold/100),"g":255*(threshold/100),"b":255*(threshold/100)}
+		var generated = copyThreshhold(clipboard,offset,image,threshold,colour);
+		target.putImageData(generated, offset.x, offset.y);
+		
+		threshold-=1;
+		if(threshold>=0){
+			current = requestAnimationFrame(iterate);
+		}
+	}
+	current = requestAnimationFrame(iterate);
 }
 
 function calculateOffsets(image){
-	var offX = Math.round((w-image.naturalWidth)/2);
-	var offY = Math.round((h-image.naturalHeight)/2);
+	width = image.naturalWidth;
+	height = image.naturalHeight;
+	var offX = Math.round((w-width)/2);
+	var offY = Math.round((h-height)/2);
 	return {'x':offX,'y':offY};
 }
 
@@ -130,24 +91,28 @@ function drawBorder(c,size,offset,image,col){
 	if(!col){
 		col = "#FFF";
 	}
+	width = Math.min(w,image.naturalWidth);
+	height = Math.min(h,image.naturalHeight);
 	c.fillStyle = col;
-	c.fillRect(offset.x-size, offset.y-size, image.naturalWidth+(size*2), image.naturalHeight+(size*2));
+	c.fillRect(offset.x-size, offset.y-size, width+(size*2), height+(size*2));
 	c.fillStyle = 'rgba(0,0,0,0.3)';
-	c.fillRect(offset.x+image.naturalWidth+size,offset.y-size+shadow,shadow,image.naturalHeight+size*2);
-	c.fillRect(offset.x-size+shadow,offset.y+image.naturalHeight+size,image.naturalWidth+size*2-shadow,shadow);
+	c.fillRect(offset.x+width+size,offset.y-size+shadow,shadow,height+size*2);
+	c.fillRect(offset.x-size+shadow,offset.y+height+size,width+size*2-shadow,shadow);
 	c.fillStyle = 'rgba(0,0,0,0.1)';
-	c.fillRect(offset.x-size-1,offset.y-size-1,1,image.naturalHeight+2+size*2);
-	c.fillRect(offset.x-size-1,offset.y-size-1,image.naturalWidth+2+size*2,1);
-	c.fillRect(offset.x+image.naturalWidth+size,offset.y-size,1,image.naturalHeight+size*2);
-	c.fillRect(offset.x-size,offset.y+image.naturalHeight+size,image.naturalWidth+1+size*2,1);
+	c.fillRect(offset.x-size-1,offset.y-size-1,1,height+2+size*2);
+	c.fillRect(offset.x-size-1,offset.y-size-1,width+2+size*2,1);
+	c.fillRect(offset.x+width+size,offset.y-size,1,height+size*2);
+	c.fillRect(offset.x-size,offset.y+height+size,width+1+size*2,1);
 }
 
 function drawInner(c,offset,image){
+	width = Math.min(w,image.naturalWidth);
+	height = Math.min(h,image.naturalHeight);
 	c.fillStyle = 'rgba(0,0,0,0.3)';
-	c.fillRect(offset.x-1,offset.y-1,1,image.naturalHeight+2);
-	c.fillRect(offset.x-1,offset.y-1,image.naturalWidth+2,1);
-	c.fillRect(offset.x+image.naturalWidth,offset.y,1,image.naturalHeight);
-	c.fillRect(offset.x,offset.y+image.naturalHeight,image.naturalWidth+1,1);
+	c.fillRect(offset.x-1,offset.y-1,1,height+2);
+	c.fillRect(offset.x-1,offset.y-1,width+2,1);
+	c.fillRect(offset.x+width,offset.y,1,height);
+	c.fillRect(offset.x,offset.y+height,width+1,1);
 }
 
 function getAverageColor(c){
@@ -171,15 +136,45 @@ function getAverageColor(c){
 	return {r:avR,g:avG,b:avB};
 }
 
+function copyThreshhold(c,offset,img,threshold,colour){
+	var size = 10;
+	var imageColours = c.getImageData(offset.x,offset.y,img.naturalWidth,img.naturalHeight);
+
+	for(var i=0; i<imageColours.data.length; i+=4){
+		var total = imageColours.data[i]+imageColours.data[i+1]+imageColours.data[i+2];
+		if(total/765 < threshold/100) {
+			imageColours.data[i] = colour.r;
+			imageColours.data[i+1] = colour.g;
+			imageColours.data[i+2] = colour.b;
+		}
+		
+	}
+
+	return imageColours;
+}
+
+function copyInverted(c,offset,img){
+	var size = 10;
+	var imageColours = c.getImageData(offset.x,offset.y,img.naturalWidth,img.naturalHeight);
+
+	for(var i=0; i<imageColours.data.length; i+=4){
+		imageColours.data[i] = 255-imageColours.data[i];
+		imageColours.data[i+1] = 255-imageColours.data[i+1];
+		imageColours.data[i+2] = 255-imageColours.data[i+2];
+	}
+
+	return imageColours;
+}
+
 function inverseColour(col){
 	return {r:255-col.r,g:255-col.g,b:255-col.b};
 }
 
 function loadNextImage(){
 	index++;
-	if(index>=photoArray.length){
+	if(index>photoArray.length){
 		index = 0;
 	}
-	loadImageIntoCanvas(photoArray[index].main);
+	loadImageIntoCanvas(photoArray[index]);
 }
 
