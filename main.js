@@ -1,4 +1,4 @@
-var w,h,c,ctx,c2,ctx2,clipboard,clipboardCtx,photoArray ,index=0,toggleCanvas,scaleFactor=0.5,border=50;
+var w,h,c,ctx,c2,ctx2,justReset,clipboard,clipboardCtx,photoArray ,index=0,toggleCanvas,scaleFactor=0.5,border=50;
 setup();
 function setup(){
 	setupCanvas();
@@ -21,13 +21,12 @@ function redraw(){
 
 	clearTimeout(to);
 	to = setTimeout(function(){
-		console.log('redraw');
 		c.width = w = getWidth();
 		c.height = h = getHeight();
 		clipboard.width = w;
 		clipboard.height = h;
+		justReset = true;
 		loadImageIntoCanvas(photoArray[index]);
-			
 	},500)
 
 }
@@ -50,6 +49,7 @@ function setupCanvas(){
 	clipboard.height = h;
 	clipboardCtx = clipboard.getContext('2d');
 	clipboardCtx.scale(scaleFactor,scaleFactor);
+	// document.getElementsByTagName('body')[0].appendChild(clipboard);
 }
 
 function setupEvents(){
@@ -73,7 +73,15 @@ function calculateScaleFactor(image){
 }
 
 function setScaleFactor(val){
-	clipboardCtx.scale(val/scaleFactor,val/scaleFactor);
+	if(val == scaleFactor){
+		return;
+	}
+	if(justReset){
+		clipboardCtx.scale(val,val);
+	} else {
+		clipboardCtx.scale(val/scaleFactor,val/scaleFactor);
+	}
+	justReset = false;
 	scaleFactor = val;
 }
 
@@ -92,8 +100,8 @@ function loadImageIntoCanvas(url){
 }
 
 function drawImageInPlace(img,targetCtx){
-	setScaleFactor(calculateScaleFactor(img));
 	clearCanvas(clipboardCtx);
+	setScaleFactor(calculateScaleFactor(img));
 	var off = calculateOffsets(img);
 	clipboardCtx.drawImage(img, 0, 0);
 	var col = getAverageColor(clipboardCtx,img);
@@ -129,12 +137,12 @@ function calculateOffsets(image){
 	return {'x':offX,'y':offY};
 }
 
-function clearCanvas(c,col){
+function clearCanvas(ct,col){
 	if(!col){
-		c.clearRect(0, 0, w, h);
+		ct.clearRect(0, 0, w/scaleFactor, h/scaleFactor);
 	} else {
-		c.fillStyle = col;
-		c.fillRect (0, 0, w, h);
+		ct.fillStyle = col;
+		ct.fillRect (0, 0, w/scaleFactor, h/scaleFactor);
 	}
 
 
