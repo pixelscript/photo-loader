@@ -1,21 +1,31 @@
-var w,h,c,ctx,c2,ctx2,justReset,clipboard,clipboardCtx,photoArray ,index=0,toggleCanvas,scaleFactor=0.5,border=50;
+var w,h,c,ctx,c2,ctx2,justReset,clipboard,clipboardCtx,photoArray,toggleCanvas,
+	index=0,scaleFactor=0.5,border=50;
+
 setup();
+
 function setup(){
 	setupCanvas();
 	setupEvents();
-	photoArray = [
-		'boxes.jpg',
-		'fizz-car.jpeg',
-		'cloud.jpg',
-		'ce.jpg',
-		'flowers-big.jpg',
-		'fizz-beach.jpg',
-		'field.jpeg',
-		'fizz-bed.jpeg'];
-	loadImageIntoCanvas(photoArray[0]);
+	setPhotoArray();
 }
 
+function setPhotoArray(){
+	var name = window.location.hash.substr(1);
+	if (window[name]){
+		photoArray = window[name];
+	} else if(defaultSet){
+		photoArray = defaultSet;
+	} else {
+		photoArray = [];
+	}
+	if(photoArray[0]){
+		loadImageIntoCanvas(photoArray[0]);
+	}
+}
+
+window.onhashchange = setPhotoArray;
 window.onresize = redraw;
+
 var to;
 function redraw(){
 

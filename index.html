@@ -23,7 +23,7 @@
 			display:none;
 		}
 		.loader{
-			background-image:url('spinner.png');
+			background-image:url('spinner.gif');
 			background-position:50% 50%;
 			background-size: 50px 50px;
 			background-repeat:no-repeat;
@@ -33,11 +33,11 @@
 			width:100%;
 			height:100%;
 			z-index:5;
-			-webkit-animation: spin 0.25s infinite linear;
-			   -moz-animation: spin 0.25s infinite linear;
-			    -ms-animation: spin 0.25s infinite linear;
-			     -o-animation: spin 0.25s infinite linear;
-			        animation: spin 0.25s infinite linear;
+			-webkit-animation: spin 0.5s infinite linear;
+			   -moz-animation: spin 0.5s infinite linear;
+			    -ms-animation: spin 0.5s infinite linear;
+			     -o-animation: spin 0.5s infinite linear;
+			        animation: spin 0.5s infinite linear;
 		}
 		@-webkit-keyframes spin {
 		    to { -webkit-transform: rotate(360deg); }
@@ -78,6 +78,32 @@
 	  ga('create', 'UA-16169708-4', 'auto');
 	  ga('send', 'pageview');
 
+	</script>
+	<script>
+	var defaultSet;
+	var pointAndShoot = [
+		'photos/point-and-shoot/island.jpg',
+		'photos/point-and-shoot/inlet.jpg',
+		'photos/point-and-shoot/coast.jpg',
+		'photos/point-and-shoot/houses.jpg',
+		];
+
+	var phone = defaultSet =  [
+		'photos/boxes.jpg',
+		'photos/fizz-car.jpeg',
+		'photos/cloud.jpg',
+		'photos/tree.jpg',
+		'photos/jenga.jpg',
+		'photos/seahouses1.jpg',
+		'photos/seahouses2.jpg',
+		'photos/fizz-beach.jpg',
+		'photos/field.jpeg',
+		'photos/fizz-bed.jpeg',
+		'photos/bridge.jpg',
+		'photos/pilon.jpg',
+		'photos/teesside_queen.jpg',
+		'photos/beach.jpg',
+		'photos/waffle.jpg'];
 	</script>
 	<script src="utils.js"></script>
 	<script src="main.js"></script>
