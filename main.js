@@ -1,5 +1,5 @@
 var w,h,c,ctx,c2,ctx2,justReset,clipboard,clipboardCtx,photoArray,toggleCanvas,
-	index=0,scaleFactor=0.5,border=50;
+	index=0,scaleFactor,border=50;
 
 setup();
 
@@ -58,8 +58,7 @@ function setupCanvas(){
 	clipboard.width = w;
 	clipboard.height = h;
 	clipboardCtx = clipboard.getContext('2d');
-	clipboardCtx.scale(scaleFactor,scaleFactor);
-	// document.getElementsByTagName('body')[0].appendChild(clipboard);
+	justReset = true;
 }
 
 function setupEvents(){
@@ -83,7 +82,7 @@ function calculateScaleFactor(image){
 }
 
 function setScaleFactor(val){
-	if(val == scaleFactor){
+	if((val == scaleFactor) && !justReset){
 		return;
 	}
 	if(justReset){
