@@ -32,7 +32,7 @@
 			top:0;
 			width:100%;
 			height:100%;
-			z-index:5;
+			z-index:1;
 			-webkit-animation: spin 0.5s infinite linear;
 			   -moz-animation: spin 0.5s infinite linear;
 			    -ms-animation: spin 0.5s infinite linear;
@@ -59,10 +59,34 @@
 		    to { transform: rotate(360deg); }
 		}
 		canvas{
-			cursor:pointer;
 			position:absolute;
 			left:0;
 			top:0;
+		}
+		.prev,.next{
+			background-image:url('prev.gif');
+			background-position:-100% 50%;
+			background-repeat:no-repeat;
+			position:absolute;
+			top:0;
+			left:0;
+			width:50%;
+			height:100%;
+			z-index:1;
+			cursor:pointer;
+		}
+		.prev:hover{
+			background-position:left center;
+		}
+
+		.next:hover{
+			background-position:right center;
+		}
+
+		.next{
+			background-image:url('next.gif');
+			right:0;
+			left:auto;
 		}
 	</style>
 </head>
@@ -82,6 +106,15 @@
 	<script>
 	var defaultSet;
 	var pointAndShoot = [
+		'photos/point-and-shoot/spookytree.jpg',
+		'photos/point-and-shoot/outtosea.jpg',
+		'photos/point-and-shoot/moneytree.jpg',
+		'photos/point-and-shoot/power.jpg',
+		'photos/point-and-shoot/mess.jpg',
+		'photos/point-and-shoot/painted.jpg',
+		'photos/point-and-shoot/fells.jpg',
+		'photos/point-and-shoot/treeline.jpg',
+		'photos/point-and-shoot/birdcoast.jpg',
 		'photos/point-and-shoot/island.jpg',
 		'photos/point-and-shoot/inlet.jpg',
 		'photos/point-and-shoot/coast.jpg',
@@ -108,5 +141,6 @@
 	<script src="utils.js"></script>
 	<script src="main.js"></script>
 	<div id="loading" class="hide"></div>
+
 </body>
 </html>

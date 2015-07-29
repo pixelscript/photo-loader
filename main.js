@@ -1,4 +1,4 @@
-var w,h,c,ctx,c2,ctx2,justReset,clipboard,clipboardCtx,photoArray,toggleCanvas,
+var next,prev,w,h,c,ctx,c2,ctx2,justReset,clipboard,clipboardCtx,photoArray,toggleCanvas,
 	index=0,scaleFactor,border=50;
 
 setup();
@@ -49,8 +49,18 @@ function setupCanvas(){
 	ctx = c.getContext('2d');
 	c.className='';
 	c.alt = "photos";
-	c.title = "CLICK FOR NEXT"
+	
 	document.getElementsByTagName('body')[0].appendChild(c);
+
+	next = document.createElement('div');
+	next.className="next";
+	next.title = "NEXT"
+	document.getElementsByTagName('body')[0].appendChild(next);
+
+	prev = document.createElement('div');
+	prev.className="prev";
+	prev.title = "PREVIOUS"
+	document.getElementsByTagName('body')[0].appendChild(prev);
 
 	toggleCanvas = false;
 
@@ -62,8 +72,13 @@ function setupCanvas(){
 }
 
 function setupEvents(){
-	document.getElementsByTagName('body')[0].addEventListener('click',function(){
-		loadNextImage();
+	document.getElementsByTagName('body')[0].addEventListener('click',function(e){
+		if(e.clientX>(w/2)){
+			loadNextImage();
+		} else {
+			loadPrevImage();
+		}
+		
 	})
 }
 
@@ -109,6 +124,8 @@ function loadImageIntoCanvas(url){
 }
 
 function drawImageInPlace(img,targetCtx){
+
+
 	clearCanvas(clipboardCtx);
 	setScaleFactor(calculateScaleFactor(img));
 	var off = calculateOffsets(img);
@@ -116,6 +133,8 @@ function drawImageInPlace(img,targetCtx){
 	var col = getAverageColor(clipboardCtx,img);
 	clearCanvas(targetCtx);
 	clearCanvas(targetCtx,'rgba('+col.r+','+col.g+','+col.b+',0.3)');
+
+	drawText(targetCtx,off,img,col);
 	drawBorder(targetCtx,12,off,img,'#FFF');
 	animateDraw(clipboardCtx,targetCtx,off,img,col);
 	drawInner(targetCtx,off,img);
@@ -138,6 +157,21 @@ function animateDraw(clipboard,target,offset,image,colour){
 	current = requestAnimationFrame(iterate);
 }
 
+function drawText(ctx,off,image,col){
+	var width = image.naturalWidth*scaleFactor,
+		height = image.naturalHeight*scaleFactor,
+		string = ((index+1).toString()+"/"+photoArray.length.toString()),
+		x = width+off.x+12,
+		y = height+off.y+35;
+
+	ctx.fillStyle = 'rgba('+(col.r-30)+','+(col.g-30)+','+(col.b-30)+',1)';
+	ctx.strokeStyle = 'rgba(255,255,255,0.5)';
+	ctx.font="20px 'Roboto Slab'";
+	ctx.textAlign = "right";
+	ctx.fillText(string,x,y);
+	ctx.strokeText(string,x,y);
+}
+
 function calculateOffsets(image){
 	width = image.naturalWidth*scaleFactor;
 	height = image.naturalHeight*scaleFactor;
@@ -153,8 +187,6 @@ function clearCanvas(ct,col){
 		ct.fillStyle = col;
 		ct.fillRect (0, 0, w/scaleFactor, h/scaleFactor);
 	}
-
-
 }
 
 function drawBorder(c,size,offset,image,col){
@@ -242,10 +274,17 @@ function inverseColour(col){
 }
 
 function loadNextImage(){
-
 	index++;
 	if(index>=photoArray.length){
 		index = 0;
+	}
+	loadImageIntoCanvas(photoArray[index]);
+}
+
+function loadPrevImage(){
+	index--;
+	if(index<0){
+		index = photoArray.length-1;
 	}
 	loadImageIntoCanvas(photoArray[index]);
 }
